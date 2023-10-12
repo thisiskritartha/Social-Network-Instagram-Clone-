@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,12 +9,15 @@ import 'package:social_network/pages/profile.dart';
 import 'package:social_network/pages/search.dart';
 import 'package:social_network/pages/upload.dart';
 import '../models/user.dart';
-import 'timeline.dart';
 import 'activity_feed.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final Reference storageRef = FirebaseStorage.instance.ref();
+
 final CollectionReference userRef =
     FirebaseFirestore.instance.collection('users');
+final CollectionReference postRef =
+    FirebaseFirestore.instance.collection('posts');
 final DateTime dateTime = DateTime.now();
 User? currentUser;
 
@@ -132,7 +136,8 @@ class _HomeState extends State<Home> {
             ),
           ),
           ActivityFeed(),
-          Upload(),
+          //Upload(currentUser: currentUser!),
+          if (currentUser != null) Upload(currentUser: currentUser!),
           Search(),
           Profile(),
         ],
