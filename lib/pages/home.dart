@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -95,8 +96,6 @@ class _HomeState extends State<Home> {
       doc = await userRef.doc(user!.id).get();
     }
     currentUser = User.fromDocument(doc);
-    print(currentUser);
-    print(currentUser!.username);
   }
 
   login() {
@@ -139,40 +138,40 @@ class _HomeState extends State<Home> {
           //Upload(currentUser: currentUser!),
           if (currentUser != null) Upload(currentUser: currentUser!),
           Search(),
-          Profile(),
+          Profile(profileId: currentUser?.id),
         ],
       ),
       bottomNavigationBar: CupertinoTabBar(
         currentIndex: pageIndex,
         onTap: onTap,
         activeColor: Theme.of(context).primaryColor,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(
               Icons.whatshot,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(
               Icons.notification_add_rounded,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(
               Icons.photo_camera,
               size: 40.0,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(
               Icons.search,
             ),
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.account_circle,
-            ),
-          ),
+              icon: CircleAvatar(
+            radius: 16.0,
+            backgroundImage: CachedNetworkImageProvider(currentUser!.photoUrl),
+          )),
         ],
       ),
     );
