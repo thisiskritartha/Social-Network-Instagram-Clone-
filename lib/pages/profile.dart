@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network/pages/home.dart';
 import 'package:social_network/widgets/progress.dart';
 import '../widgets/header.dart';
 import 'package:social_network/models/user.dart';
+import '../widgets/post.dart';
 import 'edit_profile.dart';
 
 class Profile extends StatefulWidget {
@@ -16,6 +18,32 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final String currentUserId = currentUser!.id;
+  bool isLoading = false;
+  int postCount = 0;
+  List<Post> posts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getProfilePosts();
+  }
+
+  getProfilePosts() async {
+    setState(() {
+      isLoading = true;
+    });
+    QuerySnapshot snapshot = await postRef
+        .doc(widget.profileId)
+        .collection('userPosts')
+        .orderBy('timestamp', descending: true)
+        .get();
+    setState(() {
+      isLoading = false;
+      postCount = snapshot.docs.length;
+      posts =
+          snapshot.docs.map((element) => Post.fromFactory(element)).toList();
+    });
+  }
 
   buildCountColumn(String label, int count) {
     return Column(
@@ -170,6 +198,15 @@ class _ProfileState extends State<Profile> {
         });
   }
 
+  buildProfilePosts() {
+    if (isLoading) {
+      return circularProgress();
+    }
+    return Column(
+      children: posts,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,6 +214,8 @@ class _ProfileState extends State<Profile> {
       body: ListView(
         children: [
           buildProfileHeader(),
+          const Divider(height: 0.0),
+          buildProfilePosts(),
         ],
       ),
     );

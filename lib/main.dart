@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:social_network/pages/create_account.dart';
 import 'package:social_network/pages/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -24,7 +23,7 @@ class MyApp extends StatelessWidget {
           secondary: Colors.teal,
         ),
       ),
-      home: Home(),
+      home: const Home(),
     );
   }
 }

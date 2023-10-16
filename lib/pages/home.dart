@@ -137,7 +137,7 @@ class _HomeState extends State<Home> {
           ActivityFeed(),
           //Upload(currentUser: currentUser!),
           if (currentUser != null) Upload(currentUser: currentUser!),
-          Search(),
+          const Search(),
           Profile(profileId: currentUser?.id),
         ],
       ),
@@ -168,10 +168,16 @@ class _HomeState extends State<Home> {
             ),
           ),
           BottomNavigationBarItem(
-              icon: CircleAvatar(
-            radius: 16.0,
-            backgroundImage: CachedNetworkImageProvider(currentUser!.photoUrl),
-          )),
+            icon: currentUser != null
+                ? CircleAvatar(
+                    radius: 16.0,
+                    backgroundImage:
+                        CachedNetworkImageProvider(currentUser!.photoUrl),
+                  )
+                : const Icon(
+                    Icons.account_circle,
+                  ),
+          ),
         ],
       ),
     );
