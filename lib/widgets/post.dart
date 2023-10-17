@@ -1,20 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:social_network/widgets/custom_image.dart';
 import 'package:social_network/widgets/progress.dart';
 import '../models/user.dart';
 import '../pages/home.dart';
 
 class Post extends StatefulWidget {
+  final String currentUserId = currentUser!.id;
   final String postId;
   final String ownerId;
   final String username;
   final String location;
   final String description;
   final String mediaUrl;
+  int likeCount = 0;
   final dynamic likes;
+  late bool isLiked;
 
-  const Post({
+  Post({
     super.key,
     required this.postId,
     required this.ownerId,
@@ -93,15 +97,41 @@ class _PostState extends State<Post> {
     );
   }
 
+  handleLikePost() {
+    bool _isLiked = widget.likes[widget.currentUserId] == true;
+
+    if (_isLiked) {
+      postRef
+          .doc(widget.ownerId)
+          .collection('userPosts')
+          .doc(widget.postId)
+          .update({'likes.${widget.currentUserId}': false});
+      setState(() {
+        widget.likeCount -= 1;
+        widget.isLiked = false;
+        widget.likes[widget.currentUserId] = false;
+      });
+    } else {
+      postRef
+          .doc(widget.ownerId)
+          .collection('userPosts')
+          .doc(widget.postId)
+          .update({'likes.${widget.currentUserId}': true});
+      setState(() {
+        widget.likeCount += 1;
+        widget.isLiked = true;
+        widget.likes[widget.currentUserId] = true;
+      });
+    }
+  }
+
   buildPostImage() {
     return GestureDetector(
-      onDoubleTap: () {
-        // Handle double tap (liking).
-      },
+      onDoubleTap: handleLikePost,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Image.network(post.mediaUrl),
+          cachedNetworkImage(widget.mediaUrl),
         ],
       ),
     );
@@ -115,11 +145,9 @@ class _PostState extends State<Post> {
           children: [
             const Padding(padding: EdgeInsets.only(top: 40.0, left: 20.0)),
             GestureDetector(
-              onTap: () {
-                // Handle like tap.
-              },
-              child: const Icon(
-                Icons.favorite_border,
+              onTap: handleLikePost,
+              child: Icon(
+                widget.isLiked ? Icons.favorite : Icons.favorite_border,
                 size: 28.0,
                 color: Colors.pink,
               ),
@@ -173,6 +201,8 @@ class _PostState extends State<Post> {
 
   @override
   Widget build(BuildContext context) {
+    widget.isLiked = (widget.likes[widget.currentUserId] == true);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
