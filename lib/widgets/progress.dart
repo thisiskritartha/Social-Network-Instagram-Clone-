@@ -13,7 +13,7 @@ Container circularProgress() {
 Container linearProgress() {
   return Container(
     padding: const EdgeInsets.only(bottom: 10.0),
-    child: LinearProgressIndicator(
+    child: const LinearProgressIndicator(
       valueColor: AlwaysStoppedAnimation(Colors.purple),
     ),
   );

@@ -15,6 +15,6 @@ AppBar header(context,
       ),
     ),
     centerTitle: true,
-    backgroundColor: Theme.of(context).accentColor,
+    backgroundColor: Theme.of(context).colorScheme.secondary,
   );
 }

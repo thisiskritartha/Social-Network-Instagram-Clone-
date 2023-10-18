@@ -1,3 +1,4 @@
+import 'package:social_network/pages/comments.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -154,9 +155,12 @@ class _PostState extends State<Post> {
             ),
             const Padding(padding: EdgeInsets.only(right: 20.0)),
             GestureDetector(
-              onTap: () {
-                // Handle comment tap.
-              },
+              onTap: () => showComment(
+                context,
+                postId: widget.postId,
+                ownerId: widget.ownerId,
+                mediaUrl: widget.mediaUrl,
+              ),
               child: Icon(
                 Icons.chat_bubble_outline_sharp,
                 size: 28.0,
@@ -212,4 +216,17 @@ class _PostState extends State<Post> {
       ],
     );
   }
+}
+
+showComment(BuildContext context,
+    {required String postId,
+    required String ownerId,
+    required String mediaUrl}) {
+  Navigator.push(context, MaterialPageRoute(builder: (context) {
+    return Comments(
+      postId: postId,
+      postOwnerId: ownerId,
+      postMediaUrl: mediaUrl,
+    );
+  }));
 }
