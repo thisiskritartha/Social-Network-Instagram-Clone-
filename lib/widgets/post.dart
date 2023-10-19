@@ -107,6 +107,7 @@ class _PostState extends State<Post> {
           .collection('userPosts')
           .doc(widget.postId)
           .update({'likes.${widget.currentUserId}': false});
+      removeLikeFromActivityFeed();
       setState(() {
         widget.likeCount -= 1;
         widget.isLiked = false;
@@ -118,10 +119,46 @@ class _PostState extends State<Post> {
           .collection('userPosts')
           .doc(widget.postId)
           .update({'likes.${widget.currentUserId}': true});
+      addLikeToActivityFeed();
       setState(() {
         widget.likeCount += 1;
         widget.isLiked = true;
         widget.likes[widget.currentUserId] = true;
+      });
+    }
+  }
+
+  removeLikeFromActivityFeed() {
+    bool isNotPostOwner = widget.ownerId != widget.currentUserId;
+    if (isNotPostOwner) {
+      activityFeedRef
+          .doc(widget.ownerId)
+          .collection('feedItems')
+          .doc(widget.postId)
+          .get()
+          .then((doc) {
+        if (doc.exists) {
+          doc.reference.delete();
+        }
+      });
+    }
+  }
+
+  addLikeToActivityFeed() {
+    bool isNotPostOwner = widget.ownerId != widget.currentUserId;
+    if (isNotPostOwner) {
+      activityFeedRef
+          .doc(widget.ownerId)
+          .collection('feedItems')
+          .doc(widget.postId)
+          .set({
+        'type': 'like',
+        'username': currentUser!.username,
+        'userId': currentUser!.id,
+        'userProfileImg': currentUser!.photoUrl,
+        'postId': widget.postId,
+        'mediaUrl': widget.mediaUrl,
+        'timestamp': dateTime,
       });
     }
   }

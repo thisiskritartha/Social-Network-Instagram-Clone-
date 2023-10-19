@@ -10,11 +10,12 @@ class Comments extends StatefulWidget {
   final String postId;
   final String postOwnerId;
   final String postMediaUrl;
-  const Comments(
-      {super.key,
-      required this.postId,
-      required this.postOwnerId,
-      required this.postMediaUrl});
+  const Comments({
+    super.key,
+    required this.postId,
+    required this.postOwnerId,
+    required this.postMediaUrl,
+  });
 
   @override
   State<Comments> createState() => _CommentsState(this);
@@ -55,6 +56,20 @@ class _CommentsState extends State<Comments> {
       'avatarUrl': currentUser!.photoUrl,
       'userId': currentUser!.id,
     });
+
+    bool isNotPostOwner = widget.postOwnerId != currentUser!.id;
+    if (isNotPostOwner) {
+      activityFeedRef.doc(widget.postOwnerId).collection('feedItems').add({
+        'type': 'comment',
+        'commentData': commentController.text,
+        'username': currentUser!.username,
+        'userId': currentUser!.id,
+        'userProfileImg': currentUser!.photoUrl,
+        'postId': widget.postId,
+        'mediaUrl': widget.postMediaUrl,
+        'timestamp': dateTime,
+      });
+    }
     commentController.clear();
   }
 
