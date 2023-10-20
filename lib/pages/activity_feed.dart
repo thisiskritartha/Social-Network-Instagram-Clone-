@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network/pages/home.dart';
+import 'package:social_network/pages/post_screen.dart';
+import 'package:social_network/pages/profile.dart';
 import 'package:social_network/widgets/header.dart';
 import 'package:social_network/widgets/progress.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -23,14 +25,10 @@ class _ActivityFeedState extends State<ActivityFeed> {
         .get();
 
     List<ActivityFeedItem> feedItems = [];
-    snapshot.docs.forEach((element) {
-      print('Documents : ${element.data()}');
-    });
-    snapshot.docs.forEach((doc) {
+
+    for (var doc in snapshot.docs) {
       feedItems.add(ActivityFeedItem.fromDocument(doc));
-      print('Length of feedItems: ${feedItems.length}');
-    });
-    print('Length of feedItems: ${feedItems.length}');
+    }
     return feedItems;
   }
 
@@ -91,10 +89,19 @@ class ActivityFeedItem extends StatelessWidget {
     );
   }
 
-  configuredMediaPreview() {
+  showPost(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostScreen(userId: userId, postId: postId),
+      ),
+    );
+  }
+
+  configuredMediaPreview(BuildContext context) {
     if (type == 'like' || type == 'comment') {
       mediaPreview = GestureDetector(
-        onTap: () {},
+        onTap: () => showPost(context),
         child: SizedBox(
           height: 50.0,
           width: 50.0,
@@ -127,14 +134,14 @@ class ActivityFeedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    configuredMediaPreview();
+    configuredMediaPreview(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 2.0),
       child: Container(
         color: Colors.white,
         child: ListTile(
           title: GestureDetector(
-            onTap: () {},
+            onTap: () => showProfile(context, profileId: userId),
             child: RichText(
               overflow: TextOverflow.ellipsis,
               text: TextSpan(
@@ -166,4 +173,13 @@ class ActivityFeedItem extends StatelessWidget {
       ),
     );
   }
+}
+
+showProfile(BuildContext context, {required String profileId}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Profile(profileId: profileId),
+    ),
+  );
 }

@@ -58,7 +58,7 @@ class _CommentsState extends State<Comments> {
     });
 
     bool isNotPostOwner = widget.postOwnerId != currentUser!.id;
-    if (isNotPostOwner) {
+    if (!isNotPostOwner) {
       activityFeedRef.doc(widget.postOwnerId).collection('feedItems').add({
         'type': 'comment',
         'commentData': commentController.text,

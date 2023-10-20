@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:social_network/pages/home.dart';
+import 'package:social_network/pages/profile.dart';
 import 'package:social_network/widgets/progress.dart';
 import '../models/user.dart';
 
@@ -114,6 +115,11 @@ class UserResult extends StatelessWidget {
   final User user;
   const UserResult(this.user, {super.key});
 
+  showProfile(BuildContext context, {required String profileId}) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => Profile(profileId: profileId)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -121,7 +127,7 @@ class UserResult extends StatelessWidget {
       child: Column(
         children: [
           GestureDetector(
-            onTap: () {},
+            onTap: () => showProfile(context, profileId: user.id),
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.grey,

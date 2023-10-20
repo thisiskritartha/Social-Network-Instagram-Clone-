@@ -6,6 +6,7 @@ AppBar header(context,
     automaticallyImplyLeading: removeBackButton ? false : true,
     title: Text(
       isTitle ? 'FlutterChat' : title!,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: Colors.white,
         fontFamily: isTitle ? "LuxuriousScript" : "",

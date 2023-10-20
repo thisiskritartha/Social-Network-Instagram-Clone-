@@ -1,3 +1,4 @@
+import 'package:social_network/pages/activity_feed.dart';
 import 'package:social_network/pages/comments.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +31,7 @@ class Post extends StatefulWidget {
     required this.likes,
   });
 
-  factory Post.fromFactory(DocumentSnapshot doc) {
+  factory Post.fromDocument(DocumentSnapshot doc) {
     return Post(
       postId: doc['postId'],
       ownerId: doc['ownerId'],
@@ -38,7 +39,7 @@ class Post extends StatefulWidget {
       location: doc['location'],
       description: doc['description'],
       mediaUrl: doc['mediaUrl'],
-      likes: doc['likes'] as Map<String, dynamic>,
+      likes: doc['likes'],
     );
   }
 
@@ -73,9 +74,7 @@ class _PostState extends State<Post> {
             backgroundColor: Colors.grey,
           ),
           title: GestureDetector(
-            onTap: () {
-              // Handle username tap.
-            },
+            onTap: () => showProfile(context, profileId: user.id),
             child: Text(
               user.username,
               style: const TextStyle(
