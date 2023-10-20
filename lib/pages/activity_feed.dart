@@ -23,10 +23,14 @@ class _ActivityFeedState extends State<ActivityFeed> {
         .get();
 
     List<ActivityFeedItem> feedItems = [];
-
-    for (var doc in snapshot.docs) {
+    snapshot.docs.forEach((element) {
+      print('Documents : ${element.data()}');
+    });
+    snapshot.docs.forEach((doc) {
       feedItems.add(ActivityFeedItem.fromDocument(doc));
-    }
+      print('Length of feedItems: ${feedItems.length}');
+    });
+    print('Length of feedItems: ${feedItems.length}');
     return feedItems;
   }
 
@@ -60,10 +64,10 @@ class ActivityFeedItem extends StatelessWidget {
   final String postId;
   final String userProfileImg;
   final String commentData;
-  final Timestamp dateTime;
+  final Timestamp timestamp;
 
   const ActivityFeedItem({
-    super.key,
+    Key? key,
     required this.username,
     required this.userId,
     required this.type,
@@ -71,8 +75,8 @@ class ActivityFeedItem extends StatelessWidget {
     required this.postId,
     required this.userProfileImg,
     required this.commentData,
-    required this.dateTime,
-  });
+    required this.timestamp,
+  }) : super(key: key);
 
   factory ActivityFeedItem.fromDocument(DocumentSnapshot doc) {
     return ActivityFeedItem(
@@ -83,7 +87,7 @@ class ActivityFeedItem extends StatelessWidget {
       postId: doc['postId'],
       userProfileImg: doc['userProfileImg'],
       commentData: doc['commentData'],
-      dateTime: doc['dateTime'],
+      timestamp: doc['timestamp'],
     );
   }
 
@@ -154,7 +158,7 @@ class ActivityFeedItem extends StatelessWidget {
             backgroundImage: CachedNetworkImageProvider(userProfileImg),
           ),
           subtitle: Text(
-            timeago.format(dateTime.toDate()),
+            timeago.format(timestamp.toDate()),
             overflow: TextOverflow.ellipsis,
           ),
           trailing: mediaPreview,
