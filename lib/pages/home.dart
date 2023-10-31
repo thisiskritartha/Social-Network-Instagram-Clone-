@@ -136,13 +136,24 @@ class _HomeState extends State<Home> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           //Timeline(),
-          GestureDetector(
-            onTap: logout,
-            child: Center(
-              child: Text('Logout'),
-            ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'UNDER CONSTRUCTION',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              GestureDetector(
+                onTap: logout,
+                child: const Text('Logout'),
+              )
+            ],
           ),
-          ActivityFeed(),
+          const ActivityFeed(),
           //Upload(currentUser: currentUser!),
           if (currentUser != null) Upload(currentUser: currentUser!),
           const Search(),
@@ -182,9 +193,7 @@ class _HomeState extends State<Home> {
                     backgroundImage:
                         CachedNetworkImageProvider(currentUser!.photoUrl),
                   )
-                : const Icon(
-                    Icons.account_circle,
-                  ),
+                : const Icon(Icons.account_circle),
           ),
         ],
       ),

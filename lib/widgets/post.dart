@@ -67,7 +67,10 @@ class _PostState extends State<Post> {
         if (!snapshot.hasData) {
           return circularProgress();
         }
+
         User user = User.fromDocument(snapshot.data!);
+        bool isPostOwner = widget.currentUserId == widget.ownerId;
+
         return ListTile(
           leading: CircleAvatar(
             backgroundImage: CachedNetworkImageProvider(user.photoUrl),
@@ -86,15 +89,81 @@ class _PostState extends State<Post> {
           subtitle: Text(
             post.location,
           ),
-          trailing: IconButton(
-            onPressed: () {
-              // Handle more options tap.
-            },
-            icon: const Icon(Icons.more_vert),
-          ),
+          trailing: isPostOwner
+              ? IconButton(
+                  onPressed: () => handleDeletePost(context),
+                  icon: const Icon(Icons.more_vert),
+                )
+              : const Text(''),
         );
       },
     );
+  }
+
+  handleDeletePost(BuildContext parentContext) {
+    return showDialog(
+        context: parentContext,
+        builder: (context) {
+          return SimpleDialog(
+            title: const Text('Remove this Post?'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  deletePost();
+                },
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          );
+        });
+  }
+
+  //Note: To delete the post, currentUserId must be equal to OwnerId
+  deletePost() async {
+    postRef
+        .doc(widget.ownerId)
+        .collection('userPosts')
+        .doc(widget.postId)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+
+    //Delete the uploaded image from the post
+    storageRef.child('post_${widget.postId}.jpg').delete();
+
+    //Delete all activity feed notification
+    QuerySnapshot activityFeedSnapshot = await activityFeedRef
+        .doc(widget.ownerId)
+        .collection('feedItems')
+        .where('postId', isEqualTo: widget.postId)
+        .get();
+    for (var doc in activityFeedSnapshot.docs) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    }
+
+    //Delete all the comments
+    QuerySnapshot commentsSnapshot =
+        await commentRef.doc(widget.postId).collection('comments').get();
+    for (var doc in commentsSnapshot.docs) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    }
   }
 
   handleLikePost() {
