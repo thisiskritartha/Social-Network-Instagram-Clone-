@@ -14,13 +14,14 @@ class Search extends StatefulWidget {
   State<Search> createState() => _SearchState();
 }
 
-class _SearchState extends State<Search> {
+class _SearchState extends State<Search>
+    with AutomaticKeepAliveClientMixin<Search> {
   Future<QuerySnapshot>? searchResultFuture;
   TextEditingController textEditingController = TextEditingController();
 
   handleSearch(String query) {
     Future<QuerySnapshot> users =
-        userRef!.where("displayName", isGreaterThanOrEqualTo: query).get();
+        usersRef!.where("displayName", isGreaterThanOrEqualTo: query).get();
     setState(() {
       searchResultFuture = users;
     });
@@ -103,7 +104,11 @@ class _SearchState extends State<Search> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: buildSearchField(),
       body: searchResultFuture == null ? buildNoContent() : buildSearchResult(),

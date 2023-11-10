@@ -1,25 +1,125 @@
 import 'package:flutter/material.dart';
+import 'package:social_network/pages/home.dart';
+import 'package:social_network/pages/search.dart';
 import 'package:social_network/widgets/header.dart';
-import 'package:social_network/widgets/progress.dart';
+import 'package:social_network/widgets/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-CollectionReference? usersRef = FirebaseFirestore.instance.collection("users");
+import 'package:social_network/widgets/progress.dart';
+import '../models/user.dart';
 
 class Timeline extends StatefulWidget {
-  const Timeline({Key? key}) : super(key: key);
+  final User currentUser;
+  const Timeline({super.key, required this.currentUser});
 
   @override
   State<Timeline> createState() => _TimelineState();
 }
 
 class _TimelineState extends State<Timeline> {
+  List<Post> posts = [];
+  List<dynamic> followingList = [];
+
   @override
   void initState() {
-    //createUser();
-    //updateUser();
-    //deleteUser();
     super.initState();
+    getTimeline();
+    getFollowing();
   }
+
+  getFollowing() async {
+    QuerySnapshot snapshot = await followingRef
+        .doc(currentUser!.id)
+        .collection('userFollowing')
+        .get();
+    setState(() {
+      followingList = snapshot.docs.map((doc) => doc.id).toList();
+    });
+  }
+
+  getTimeline() async {
+    QuerySnapshot snapshot = await timelineRef
+        .doc(widget.currentUser.id)
+        .collection('timelinePosts')
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    List<Post> posts = snapshot.docs.map((e) => Post.fromDocument(e)).toList();
+    setState(() {
+      this.posts = posts;
+    });
+  }
+
+  buildTimeline() {
+    if (posts == null) {
+      return circularProgress();
+    } else if (posts.isEmpty) {
+      return buildUserToFollow();
+    } else {
+      return ListView(
+        children: posts,
+      );
+    }
+  }
+
+  buildUserToFollow() {
+    return StreamBuilder(
+        stream: usersRef
+            .orderBy('timestamp', descending: true)
+            .limit(10)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return circularProgress();
+          }
+          List<UserResult> userResults = [];
+          for (var doc in snapshot.data!.docs) {
+            User user = User.fromDocument(doc);
+            final bool isAuthUser = currentUser?.id == user.id;
+            final bool isFollowingUser = followingList.contains(user.id);
+
+            if (isAuthUser || isFollowingUser) {
+              continue;
+            } else {
+              UserResult userResult = UserResult(user);
+              userResults.add(userResult);
+            }
+          }
+          return Container(
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_add,
+                        color: Theme.of(context).primaryColor,
+                        size: 30.0,
+                      ),
+                      const SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        'User to Follow',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: userResults,
+                )
+              ],
+            ),
+          );
+        });
+  }
+
   //
   // getUserById() async {
   //   final String id = "O5zHKgw8SOfSZeVrnyLU";
@@ -62,20 +162,10 @@ class _TimelineState extends State<Timeline> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: header(context, isTitle: true),
-      body: Text('Timeline'),
-      // body: StreamBuilder<QuerySnapshot>(
-      //   stream: usersRef!.snapshots(),
-      //   builder: (context, snapshot) {
-      //     if (!snapshot.hasData) {
-      //       return circularProgress();
-      //     }
-      //     final List<Text> children =
-      //         snapshot.data!.docs.map((e) => Text(e['username'])).toList();
-      //     return ListView(
-      //       children: children,
-      //     );
-      //   },
-      // ),
+      body: RefreshIndicator(
+        onRefresh: () => getTimeline(),
+        child: buildTimeline(),
+      ),
     );
   }
 }

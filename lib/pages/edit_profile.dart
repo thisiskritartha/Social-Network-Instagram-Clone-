@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:social_network/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network/pages/home.dart';
-import 'package:social_network/pages/timeline.dart';
 import 'package:social_network/widgets/progress.dart';
 
 class EditProfile extends StatefulWidget {
@@ -33,7 +32,7 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       isLoading = true;
     });
-    DocumentSnapshot doc = await usersRef!.doc(widget.currentUserId).get();
+    DocumentSnapshot doc = await usersRef.doc(widget.currentUserId).get();
     user = User.fromDocument(doc);
     displayNameController.text = user!.displayName;
     bioController.text = user!.bio;

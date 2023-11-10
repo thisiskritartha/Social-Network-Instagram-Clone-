@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,13 +8,14 @@ import 'package:social_network/pages/create_account.dart';
 import 'package:social_network/pages/profile.dart';
 import 'package:social_network/pages/search.dart';
 import 'package:social_network/pages/upload.dart';
+import 'package:social_network/pages/timeline.dart';
 import '../models/user.dart';
 import 'activity_feed.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final Reference storageRef = FirebaseStorage.instance.ref();
 
-final CollectionReference userRef =
+final CollectionReference usersRef =
     FirebaseFirestore.instance.collection('users');
 final CollectionReference postRef =
     FirebaseFirestore.instance.collection('posts');
@@ -27,6 +27,8 @@ final CollectionReference followerRef =
     FirebaseFirestore.instance.collection('followers');
 final CollectionReference followingRef =
     FirebaseFirestore.instance.collection('following');
+final CollectionReference timelineRef =
+    FirebaseFirestore.instance.collection('timeline');
 final DateTime dateTime = DateTime.now();
 User? currentUser;
 
@@ -68,9 +70,9 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  handleSignIn(GoogleSignInAccount? account) {
+  handleSignIn(GoogleSignInAccount? account) async {
     if (account != null) {
-      createUserInFirestore(context);
+      await createUserInFirestore(context);
       setState(() {
         isAuth = true;
       });
@@ -82,17 +84,19 @@ class _HomeState extends State<Home> {
   }
 
   createUserInFirestore(BuildContext context) async {
+    //1) Check if user exist in users collection in database(according to their id)
     final GoogleSignInAccount? user = googleSignIn.currentUser;
-    DocumentSnapshot doc = await userRef.doc(user!.id).get();
+    DocumentSnapshot doc = await usersRef.doc(user!.id).get();
 
     if (!doc.exists) {
+      //2) If user doesn't exist, then we want to take them to create account page.
       final username = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CreateAccount(),
           ));
 
-      userRef.doc(user.id).set({
+      usersRef.doc(user.id).set({
         "id": user.id,
         "username": username,
         "displayName": user.displayName,
@@ -101,7 +105,15 @@ class _HomeState extends State<Home> {
         "bio": "",
         "timestamp": dateTime,
       });
-      doc = await userRef.doc(user!.id).get();
+
+      //make new user their own follower(to include their post in their timeline)
+      await followerRef
+          .doc(user.id)
+          .collection('userFollowers')
+          .doc(user.id)
+          .set({});
+
+      doc = await usersRef.doc(user!.id).get();
     }
     currentUser = User.fromDocument(doc);
   }
@@ -135,26 +147,25 @@ class _HomeState extends State<Home> {
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          //Timeline(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'UNDER CONSTRUCTION',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              GestureDetector(
-                onTap: logout,
-                child: const Text('Logout'),
-              )
-            ],
-          ),
+          if (currentUser != null) Timeline(currentUser: currentUser!),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     const Text(
+          //       'UNDER CONSTRUCTION',
+          //       style: TextStyle(
+          //         fontSize: 30,
+          //         fontWeight: FontWeight.bold,
+          //         fontStyle: FontStyle.italic,
+          //       ),
+          //     ),
+          //     GestureDetector(
+          //       onTap: logout,
+          //       child: const Text('Logout'),
+          //     )
+          //   ],
+          // ),
           const ActivityFeed(),
-          //Upload(currentUser: currentUser!),
           if (currentUser != null) Upload(currentUser: currentUser!),
           const Search(),
           Profile(profileId: currentUser?.id),

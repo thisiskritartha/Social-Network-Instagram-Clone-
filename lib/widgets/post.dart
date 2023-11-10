@@ -62,7 +62,7 @@ class _PostState extends State<Post> {
 
   buildPostHeader() {
     return FutureBuilder(
-      future: userRef.doc(post.ownerId).get(),
+      future: usersRef.doc(post.ownerId).get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
