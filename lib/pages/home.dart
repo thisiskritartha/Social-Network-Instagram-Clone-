@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +42,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool isAuth = false;
   late PageController pageController;
   int pageIndex = 0;
@@ -53,14 +57,14 @@ class _HomeState extends State<Home> {
     googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignIn(account);
     }, onError: (err) {
-      print('Error Signing in: $err');
+      //print('Error Signing in: $err');
     });
 
     //Re-authenticate the user when app is opened
     googleSignIn.signInSilently(suppressErrors: false).then((account) {
       handleSignIn(account!);
     }).catchError((err) {
-      print('Error Signing in: $err');
+      //print('Error Signing in: $err');
     });
   }
 
@@ -76,11 +80,48 @@ class _HomeState extends State<Home> {
       setState(() {
         isAuth = true;
       });
+      configurePushNotifications();
     } else {
       setState(() {
         isAuth = false;
       });
     }
+  }
+
+  configurePushNotifications() {
+    final GoogleSignInAccount? user = googleSignIn.currentUser;
+    if (Platform.isIOS) getiOSPermission();
+
+    _firebaseMessaging.getToken().then((token) {
+      usersRef.doc(user!.id).update({
+        'androidNotificationToken': token,
+      });
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      //print('On Message: $message');
+      final String recipientId = message.data['data']['recipientId'];
+      final String body = message.data['notification']['body'];
+      if (recipientId == user!.id) {
+        //print('Notification Sent');
+        SnackBar snackBar = SnackBar(
+            content: Text(
+          body,
+          overflow: TextOverflow.ellipsis,
+        ));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        //print('Notification not shown');
+      }
+    });
+  }
+
+  getiOSPermission() {
+    _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   createUserInFirestore(BuildContext context) async {
@@ -93,7 +134,7 @@ class _HomeState extends State<Home> {
       final username = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CreateAccount(),
+            builder: (context) => const CreateAccount(),
           ));
 
       usersRef.doc(user.id).set({
@@ -113,7 +154,7 @@ class _HomeState extends State<Home> {
           .doc(user.id)
           .set({});
 
-      doc = await usersRef.doc(user!.id).get();
+      doc = await usersRef.doc(user.id).get();
     }
     currentUser = User.fromDocument(doc);
   }
@@ -142,29 +183,13 @@ class _HomeState extends State<Home> {
 
   Scaffold buildAuthScreen() {
     return Scaffold(
+      key: _scaffoldKey,
       body: PageView(
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
         children: [
           if (currentUser != null) Timeline(currentUser: currentUser!),
-          // Column(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     const Text(
-          //       'UNDER CONSTRUCTION',
-          //       style: TextStyle(
-          //         fontSize: 30,
-          //         fontWeight: FontWeight.bold,
-          //         fontStyle: FontStyle.italic,
-          //       ),
-          //     ),
-          //     GestureDetector(
-          //       onTap: logout,
-          //       child: const Text('Logout'),
-          //     )
-          //   ],
-          // ),
           const ActivityFeed(),
           if (currentUser != null) Upload(currentUser: currentUser!),
           const Search(),

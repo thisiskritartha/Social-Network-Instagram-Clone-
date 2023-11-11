@@ -16,7 +16,7 @@ class _CreateAccountState extends State<CreateAccount> {
   submit() {
     final form = _formKey.currentState;
     if (form!.validate()) {
-      form!.save();
+      form.save();
       SnackBar snackBar = SnackBar(content: Text("Welcome $username"));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Timer(const Duration(seconds: 2), () {
@@ -58,7 +58,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       validator: (val) {
                         if (val!.trim().length < 3 || val.isEmpty) {
                           return 'Username too short';
-                        } else if (val!.trim().length > 15) {
+                        } else if (val.trim().length > 15) {
                           return 'Username too long.';
                         } else if (!containsNumericDigit(val)) {
                           return 'Username must contain at least one numeric digit';

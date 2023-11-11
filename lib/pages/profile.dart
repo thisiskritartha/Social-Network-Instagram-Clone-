@@ -226,6 +226,8 @@ class _ProfileState extends State<Profile> {
       'userId': currentUserId,
       'userProfileImg': currentUser!.photoUrl,
       'timestamp': dateTime,
+      'commentData': '',
+      'mediaUrl': '',
     });
   }
 
@@ -395,7 +397,7 @@ class _ProfileState extends State<Profile> {
       body: ListView(
         children: [
           buildProfileHeader(),
-          Divider(),
+          const Divider(),
           buildTogglePositionOrientation(),
           const Divider(height: 0.0),
           buildProfilePosts(),

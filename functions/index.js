@@ -198,7 +198,7 @@ exports.onCreateActivityFeedItem = functions.firestore
 
       //4) Create message for push notification
       const message = {
-        Notification: { body },
+        notification: { body },
         token: androidNotificationToken,
         data: { recipient: userId },
       };

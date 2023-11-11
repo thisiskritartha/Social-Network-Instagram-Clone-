@@ -227,6 +227,7 @@ class _PostState extends State<Post> {
         'postId': widget.postId,
         'mediaUrl': widget.mediaUrl,
         'timestamp': dateTime,
+        'commentData': '',
       });
     }
   }

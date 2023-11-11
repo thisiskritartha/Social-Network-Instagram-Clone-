@@ -27,6 +27,8 @@ class _ActivityFeedState extends State<ActivityFeed> {
     List<ActivityFeedItem> feedItems = [];
 
     for (var doc in snapshot.docs) {
+      print('1');
+      print(doc.data());
       feedItems.add(ActivityFeedItem.fromDocument(doc));
     }
     return feedItems;
@@ -39,11 +41,12 @@ class _ActivityFeedState extends State<ActivityFeed> {
       body: FutureBuilder(
         future: getActivityFeed(),
         builder: (context, snapshot) {
+          print(snapshot.data);
           if (!snapshot.hasData) {
             return circularProgress();
           }
           return ListView(
-            children: (snapshot.data as List<Widget>),
+            children: snapshot.data as List<Widget>,
           );
         },
       ),
@@ -109,10 +112,11 @@ class ActivityFeedItem extends StatelessWidget {
             aspectRatio: 16 / 9,
             child: Container(
               decoration: BoxDecoration(
-                  image: DecorationImage(
-                fit: BoxFit.cover,
-                image: CachedNetworkImageProvider(mediaUrl),
-              )),
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(mediaUrl),
+                ),
+              ),
             ),
           ),
         ),

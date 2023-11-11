@@ -232,7 +232,7 @@ class _UploadState extends State<Upload>
           ListTile(
             leading: CircleAvatar(
               backgroundImage:
-                  CachedNetworkImageProvider(widget.currentUser!.photoUrl),
+                  CachedNetworkImageProvider(widget.currentUser.photoUrl),
             ),
             title: SizedBox(
               width: 250,
