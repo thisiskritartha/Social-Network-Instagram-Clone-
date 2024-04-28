@@ -1,8 +1,8 @@
 # Social Network
 
-Introducing "FlutterChat" the ultimate social photo-sharing application that seamlessly integrates with Google for a hassle-free sign-in experience made using Flutter and Firebase.
+Introducing "Instagram Clone" the ultimate social photo-sharing application that seamlessly integrates with Google for a hassle-free sign-in experience made using Flutter and Firebase.
 
-1) Effortlessly join FlutterChat using your Google credentials. No need to remember additional usernames or passwords—start exploring the world of visual storytelling with a single click.
+1) Effortlessly join using your Google credentials. No need to remember additional usernames or passwords—start exploring the world of visual storytelling with a single click.
 2) Unleash your creativity by uploading and sharing your favorite moments captured through your lens. SnapConnect supports high-quality image uploads to ensure your photos look as vibrant as the memories they hold.
 3) Express your appreciation for stunning visuals by liking photos that resonate with you. FlutterChat makes it easy to engage with the community, fostering a positive and supportive environment. Leave thoughtful comments to connect with creators and share your thoughts.
 4) Build your network of like-minded individuals by following other users whose content inspires you. Stay updated with their latest uploads, creating a personalized feed that reflects your interests and passions.
